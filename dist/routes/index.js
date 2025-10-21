@@ -8,7 +8,7 @@ router.post("/createAnswer", createAnswer);
 router.post("/createReply", createReply);
 router.get("/listMessage", listMessages);
 router.get("/", showLogin);
-router.post("/login", login);
+router.post("/signin", login);
 router.get("/signup", showSignup);
 router.post("/signup", signup);
 router.get("/profile", showProfile);

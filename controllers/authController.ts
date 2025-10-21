@@ -14,15 +14,23 @@ export const login = async (
   req: Request<{}, {}, LoginRequest>,
   res: Response,
 ): Promise<void> => {
-  const { email } = req.body;
+  const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      res.render("error", { message: "Email non trouvé." });
+      res.status(401).render("error", { message: "Email ou mot de passe incorrect." });
       return;
     }
+    
+    // Vérifier le mot de passe (en production, utiliser bcrypt pour comparer les hash)
+    if (user.password !== password) {
+      res.status(401).render("error", { message: "Email ou mot de passe incorrect." });
+      return;
+    }
+    
     res.redirect(`/listMessage?userId=${user.user_id}`);
   } catch (error) {
+    console.error("Erreur lors de la connexion:", error);
     res.status(500).render("error", { message: "Erreur serveur" });
   }
 };

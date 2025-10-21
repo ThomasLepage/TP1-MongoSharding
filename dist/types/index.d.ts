@@ -27,6 +27,7 @@ export interface IPost extends Document {
 }
 export interface LoginRequest {
     email: string;
+    password: string;
 }
 export interface SignupRequest {
     firstname: string;
