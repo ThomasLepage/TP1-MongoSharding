@@ -6,7 +6,7 @@ import {
   createReply,
   listMessages,
 } from "../controllers/postController.js";
-import { showLogin, login } from "../controllers/authController.js";
+import { showLogin, login, showSignup, signup } from "../controllers/authController.js";
 
 const router: Router = Router();
 
@@ -17,5 +17,7 @@ router.post("/createReply", createReply);
 router.get("/listMessage", listMessages);
 router.get("/", showLogin);
 router.post("/login", login);
+router.get("/signup", showSignup);
+router.post("/signup", signup);
 
 export default router;

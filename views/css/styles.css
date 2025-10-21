@@ -42,7 +42,10 @@ label {
   font-weight: bold;
 }
 
-input[type="email"] {
+input[type="email"],
+input[type="text"],
+input[type="password"],
+input[type="url"] {
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -51,7 +54,10 @@ input[type="email"] {
   transition: border-color 0.3s;
 }
 
-input[type="email"]:focus {
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus {
   border-color: #1a73e8;
 }
 
@@ -72,6 +78,29 @@ button:hover {
 
 button:active {
   background-color: #0d47a1;
+}
+
+/* Liens de navigation */
+.signup-link {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.signup-link p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.signup-link a {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
 }
 
 /* Liste des messages */

@@ -1,8 +1,14 @@
 import { Schema, model } from "mongoose";
+const replySchema = new Schema({
+    message: { type: String, required: true },
+    author: { type: String, required: true },
+    creationDate: { type: Date, default: Date.now },
+});
 const answerSchema = new Schema({
     message: { type: String, required: true },
     author: { type: String, required: true },
     creationDate: { type: Date, default: Date.now },
+    replies: [replySchema],
 });
 const postSchema = new Schema({
     post_id: { type: Number, required: true },

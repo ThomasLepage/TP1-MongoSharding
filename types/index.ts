@@ -5,6 +5,8 @@ export interface IUser extends Document {
   firstname: string;
   lastname: string;
   email: string;
+  password: string;
+  avatar: string;
 }
 
 export interface IReply {
@@ -30,6 +32,14 @@ export interface IPost extends Document {
 
 export interface LoginRequest {
   email: string;
+}
+
+export interface SignupRequest {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
+  avatar: string;
 }
 
 export interface CreatePostRequest {
