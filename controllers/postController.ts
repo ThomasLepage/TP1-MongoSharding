@@ -1,7 +1,12 @@
+import { Request, Response } from "express";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import { CreatePostRequest, CreateAnswerRequest } from "../types/index.js";
 
-export const getAllPosts = async (req, res) => {
+export const getAllPosts = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const posts = await Post.find().sort({ post_id: -1 });
     res.json(posts);
@@ -10,11 +15,17 @@ export const getAllPosts = async (req, res) => {
   }
 };
 
-export const createPost = async (req, res) => {
+export const createPost = async (
+  req: Request<{}, {}, CreatePostRequest>,
+  res: Response,
+): Promise<void> => {
   const { authorId, message } = req.body;
   try {
     const user = await User.findOne({ user_id: authorId });
-    if (!user) return res.status(404).json({ error: "Auteur introuvable" });
+    if (!user) {
+      res.status(404).json({ error: "Auteur introuvable" });
+      return;
+    }
 
     const post = await Post.create({
       post_id: Date.now(),
@@ -28,18 +39,28 @@ export const createPost = async (req, res) => {
   }
 };
 
-export const createAnswer = async (req, res) => {
+export const createAnswer = async (
+  req: Request<{}, {}, CreateAnswerRequest>,
+  res: Response,
+): Promise<void> => {
   const { authorId, messageId, answer } = req.body;
   try {
     const user = await User.findOne({ user_id: authorId });
     const post = await Post.findOne({ post_id: messageId });
 
-    if (!user) return res.status(404).json({ error: "Auteur introuvable" });
-    if (!post) return res.status(404).json({ error: "Message introuvable" });
+    if (!user) {
+      res.status(404).json({ error: "Auteur introuvable" });
+      return;
+    }
+    if (!post) {
+      res.status(404).json({ error: "Message introuvable" });
+      return;
+    }
 
     post.answers.push({
       message: answer,
       author: user.firstname,
+      creationDate: new Date(),
     });
 
     await post.save();
@@ -49,7 +70,10 @@ export const createAnswer = async (req, res) => {
   }
 };
 
-export const listMessages = async (req, res) => {
+export const listMessages = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const posts = await Post.find().sort({ post_id: -1 });
     res.render("listMessage", { posts, userId: req.query.userId || "" });

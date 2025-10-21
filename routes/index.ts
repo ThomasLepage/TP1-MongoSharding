@@ -1,8 +1,13 @@
 import { Router } from "express";
-import { getAllPosts, createPost, createAnswer, listMessages } from "../controllers/postController.js";
+import {
+  getAllPosts,
+  createPost,
+  createAnswer,
+  listMessages,
+} from "../controllers/postController.js";
 import { showLogin, login } from "../controllers/authController.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/index", getAllPosts);
 router.post("/createMessage", createPost);
