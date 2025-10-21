@@ -1,12 +1,12 @@
-const mongoose = require("mongoose");
+import { Schema, model } from "mongoose";
 
-const answerSchema = new mongoose.Schema({
+const answerSchema = new Schema({
   message: String,
   author: String,
   creationDate: { type: Date, default: Date.now },
 });
 
-const postSchema = new mongoose.Schema({
+const postSchema = new Schema({
   post_id: Number,
   message: String,
   author: String,
@@ -14,4 +14,5 @@ const postSchema = new mongoose.Schema({
   creationDate: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Post", postSchema);
+export default model("Post", postSchema);
+
