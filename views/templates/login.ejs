@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <title>Connexion</title>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Connexion</h1>
+      <form id="loginForm" class="login-form">
+        <label>Email</label>
+        <input type="email" name="email" required />
+        <button type="submit">Se connecter</button>
+      </form>
+    </div>
+    <script>
+      document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.querySelector('input[name="email"]').value;
+        try {
+          const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            document.body.innerHTML = await response.text();
+          }
+        } catch (error) {
+          console.error("Erreur:", error);
+        }
+      });
+    </script>
+  </body>
+</html>
