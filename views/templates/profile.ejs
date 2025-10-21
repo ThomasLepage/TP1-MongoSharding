@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <title>Modifier mon profil</title>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Modifier mon profil</h1>
+      <form id="profileForm" class="login-form">
+        <input type="hidden" name="userId" value="<%= user.user_id %>">
+        
+        <label>Prénom</label>
+        <input type="text" name="firstname" value="<%= user.firstname %>" required />
+        
+        <label>Nom</label>
+        <input type="text" name="lastname" value="<%= user.lastname %>" required />
+        
+        <label>Email</label>
+        <input type="email" name="email" value="<%= user.email %>" required />
+        
+        <label>Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+        <input type="password" name="password" placeholder="Nouveau mot de passe" />
+        
+        <label>Avatar (URL)</label>
+        <input type="url" name="avatar" value="<%= user.avatar %>" placeholder="https://example.com/avatar.jpg" />
+        
+        <button type="submit">Mettre à jour le profil</button>
+      </form>
+      
+      <div class="signup-link">
+        <p><a href="/listMessage?userId=<%= user.user_id %>">← Retour aux messages</a></p>
+      </div>
+    </div>
+    
+    <script>
+      document.getElementById("profileForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const userId = formData.get("userId");
+        const userData = {
+          userId: parseInt(userId),
+          firstname: formData.get("firstname"),
+          lastname: formData.get("lastname"),
+          email: formData.get("email"),
+          password: formData.get("password"),
+          avatar: formData.get("avatar")
+        };
+        
+        try {
+          const response = await fetch("/profile", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userData),
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+              alert("Profil mis à jour avec succès !");
+              window.location.href = `/listMessage?userId=${userId}`;
+            } else {
+              document.body.innerHTML = await response.text();
+            }
+          } else {
+            document.body.innerHTML = await response.text();
+          }
+        } catch (error) {
+          console.error("Erreur:", error);
+          alert("Une erreur est survenue lors de la mise à jour du profil.");
+        }
+      });
+    </script>
+  </body>
+</html>

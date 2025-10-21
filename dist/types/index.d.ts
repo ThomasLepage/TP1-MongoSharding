@@ -35,6 +35,14 @@ export interface SignupRequest {
     password: string;
     avatar: string;
 }
+export interface UpdateProfileRequest {
+    userId: number;
+    firstname: string;
+    lastname: string;
+    email: string;
+    password?: string;
+    avatar: string;
+}
 export interface CreatePostRequest {
     authorId: number;
     message: string;
