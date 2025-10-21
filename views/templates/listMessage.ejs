@@ -26,8 +26,31 @@
           <div class="post-answers">
             <em>Réponses:</em>
             <ul>
-              <% p.answers.forEach(a => { %>
-                <li class="answer"><span class="answer-author"><%= a.author %></span>: <%= a.message %></li>
+              <% p.answers.forEach((a, answerIndex) => { %>
+                <li class="answer">
+                  <div class="answer-content">
+                    <span class="answer-author"><%= a.author %></span>: <%= a.message %>
+                  </div>
+                  <% if (a.replies && a.replies.length > 0) { %>
+                    <div class="replies">
+                      <em>Réponses à cette réponse:</em>
+                      <ul>
+                        <% a.replies.forEach(r => { %>
+                          <li class="reply"><span class="reply-author"><%= r.author %></span>: <%= r.message %></li>
+                        <% }) %>
+                      </ul>
+                    </div>
+                  <% } %>
+                  <form class="reply-form form-flex" data-post-id="<%= p.post_id %>" data-answer-index="<%= answerIndex %>">
+                    <input type="hidden" name="authorId" value="<%= userId %>">
+                    <input type="hidden" name="messageId" value="<%= p.post_id %>">
+                    <input type="hidden" name="answerIndex" value="<%= answerIndex %>">
+                    <div class="input-group">
+                      <textarea name="reply" placeholder="Répondre à cette réponse..." required></textarea>
+                      <button type="submit">Répondre</button>
+                    </div>
+                  </form>
+                </li>
               <% }) %>
             </ul>
             <form class="answer-form form-flex" data-post-id="<%= p.post_id %>">
@@ -77,6 +100,32 @@
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ authorId, messageId, answer }),
+            });
+            if (response.ok) {
+              form.reset();
+              window.location.reload();
+            } else {
+              alert("Erreur lors de l'ajout de la réponse");
+            }
+          } catch (error) {
+            console.error("Erreur:", error);
+            alert("Une erreur est survenue");
+          }
+        });
+      });
+
+      document.querySelectorAll(".reply-form").forEach(form => {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const authorId = form.querySelector('input[name="authorId"]').value;
+          const messageId = form.querySelector('input[name="messageId"]').value;
+          const answerIndex = parseInt(form.querySelector('input[name="answerIndex"]').value);
+          const reply = form.querySelector('textarea[name="reply"]').value;
+          try {
+            const response = await fetch("/createReply", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ authorId, messageId, answerIndex, reply }),
             });
             if (response.ok) {
               form.reset();

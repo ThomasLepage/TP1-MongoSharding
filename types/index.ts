@@ -7,10 +7,17 @@ export interface IUser extends Document {
   email: string;
 }
 
+export interface IReply {
+  message: string;
+  author: string;
+  creationDate: Date;
+}
+
 export interface IAnswer {
   message: string;
   author: string;
   creationDate: Date;
+  replies: IReply[];
 }
 
 export interface IPost extends Document {
@@ -34,4 +41,11 @@ export interface CreateAnswerRequest {
   authorId: number;
   messageId: number;
   answer: string;
+}
+
+export interface CreateReplyRequest {
+  authorId: number;
+  messageId: number;
+  answerIndex: number;
+  reply: string;
 }

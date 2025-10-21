@@ -274,3 +274,48 @@ button:active {
 .logout-button:hover {
   background-color: #c82333; /* Couleur plus foncée au survol */
 }
+
+/* Styles pour les réponses imbriquées */
+.replies {
+  margin-left: 20px;
+  margin-top: 10px;
+  padding-left: 15px;
+  border-left: 2px solid #e0e0e0;
+}
+
+.reply {
+  color: #777;
+  font-size: 0.85em;
+  margin: 3px 0;
+  padding: 5px 0;
+}
+
+.reply-author {
+  font-weight: bold;
+  color: #28a745;
+}
+
+.reply-form {
+  margin-top: 10px;
+  margin-left: 20px;
+}
+
+.reply-form textarea {
+  font-size: 13px;
+  min-height: 50px;
+  padding: 6px;
+}
+
+.reply-form button {
+  padding: 6px 12px;
+  font-size: 12px;
+  background-color: #28a745;
+}
+
+.reply-form button:hover {
+  background-color: #218838;
+}
+
+.answer-content {
+  margin-bottom: 8px;
+}

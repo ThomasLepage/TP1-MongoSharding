@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Post from "../models/Post.js";
 import User from "../models/User.js";
-import { CreatePostRequest, CreateAnswerRequest } from "../types/index.js";
+import { CreatePostRequest, CreateAnswerRequest, CreateReplyRequest } from "../types/index.js";
 
 export const getAllPosts = async (
   req: Request,
@@ -59,6 +59,42 @@ export const createAnswer = async (
 
     post.answers.push({
       message: answer,
+      author: user.firstname,
+      creationDate: new Date(),
+      replies: [],
+    });
+
+    await post.save();
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
+export const createReply = async (
+  req: Request<{}, {}, CreateReplyRequest>,
+  res: Response,
+): Promise<void> => {
+  const { authorId, messageId, answerIndex, reply } = req.body;
+  try {
+    const user = await User.findOne({ user_id: authorId });
+    const post = await Post.findOne({ post_id: messageId });
+
+    if (!user) {
+      res.status(404).json({ error: "Auteur introuvable" });
+      return;
+    }
+    if (!post) {
+      res.status(404).json({ error: "Message introuvable" });
+      return;
+    }
+    if (answerIndex < 0 || answerIndex >= post.answers.length) {
+      res.status(404).json({ error: "Réponse introuvable" });
+      return;
+    }
+
+    post.answers[answerIndex].replies.push({
+      message: reply,
       author: user.firstname,
       creationDate: new Date(),
     });
