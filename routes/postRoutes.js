@@ -1,12 +1,12 @@
-const express = require("express");
-const router = express.Router();
-const Post = require("../models/Post");
-const User = require("../models/User");
+import { Router } from "express";
+const router = Router();
+import Post from "../models/Post.js";
+import User from "../models/User.js";
 
 // === Route 1 : /index ===
 // Affiche tous les messages et leurs réponses
 router.get("/index", async (req, res) => {
-  const posts = await Post.find();
+  const posts = await find();
   res.json(posts);
 });
 
@@ -17,10 +17,10 @@ router.post("/createMessage", async (req, res) => {
   const user = await User.findOne({ user_id: authorId });
   if (!user) return res.status(404).send("Auteur introuvable");
 
-  const post = await Post.create({
+  const post = await create({
     post_id: Date.now(), // identifiant unique simple
     author: user.firstname,
-    message
+    message,
   });
 
   res.json(post);
@@ -96,7 +96,7 @@ router.get("/listMessage", async (req, res) => {
           <div class="new-post-form">
             <h2>Nouveau message</h2>
             <form id="newPostForm" class="form-flex">
-              <input type="hidden" name="authorId" value="${req.query.userId || ''}">
+              <input type="hidden" name="authorId" value="${req.query.userId || ""}">
               <div class="input-group">
                 <textarea name="message" placeholder="Écrivez votre message..." required></textarea>
                 <button type="submit">Publier</button>
@@ -105,20 +105,26 @@ router.get("/listMessage", async (req, res) => {
           </div>
 
           <!-- Liste des messages -->
-          ${posts.map(p => `
+          ${posts
+            .map(
+              (p) => `
             <div class="post">
               <div class="post-author">${p.author}</div>
               <div class="post-message">${p.message}</div>
               <div class="post-answers">
                 <em>Réponses:</em>
                 <ul>
-                  ${p.answers.map(a => `
+                  ${p.answers
+                    .map(
+                      (a) => `
                     <li class="answer"><span class="answer-author">${a.author}</span>: ${a.message}</li>
-                  `).join("")}
+                  `,
+                    )
+                    .join("")}
                 </ul>
                 <!-- Formulaire pour répondre à ce message -->
                 <form class="answer-form form-flex" data-post-id="${p.post_id}">
-                  <input type="hidden" name="authorId" value="${req.query.userId || ''}">
+                  <input type="hidden" name="authorId" value="${req.query.userId || ""}">
                   <input type="hidden" name="messageId" value="${p.post_id}">
                   <div class="input-group">
                     <textarea name="answer" placeholder="Votre réponse..." required></textarea>
@@ -127,7 +133,9 @@ router.get("/listMessage", async (req, res) => {
                 </form>
               </div>
             </div>
-          `).join("")}
+          `,
+            )
+            .join("")}
         </div>
         <script>
           // Gestion du formulaire pour un nouveau message
@@ -304,4 +312,4 @@ router.post("/login", async (req, res) => {
   res.redirect(`/listMessage?userId=${user.user_id}`);
 });
 
-module.exports = router;
+export default router;
