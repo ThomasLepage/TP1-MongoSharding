@@ -69,3 +69,9 @@ export interface CreateReplyRequest {
   answerIndex: number;
   reply: string;
 }
+
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+  }
+}

@@ -11,7 +11,7 @@ export const showSignup = (req: Request, res: Response): void => {
 };
 
 export const login = async (
-  req: Request<{}, {}, LoginRequest>,
+  req: Request,
   res: Response,
 ): Promise<void> => {
   const { email, password } = req.body;
@@ -28,7 +28,9 @@ export const login = async (
       return;
     }
     
-    res.redirect(`/listMessage?userId=${user.user_id}`);
+    // À la connexion, enregistrer l'utilisateur dans la session
+    req.session.userId = user.user_id;
+    res.redirect("/listMessage");
   } catch (error) {
     console.error("Erreur lors de la connexion:", error);
     res.status(500).render("error", { message: "Erreur serveur" });
@@ -77,7 +79,7 @@ export const signup = async (
 };
 
 export const showProfile = async (req: Request, res: Response): Promise<void> => {
-  const { userId } = req.query;
+  const userId = req.session?.userId;
   
   if (!userId) {
     res.status(400).render("error", { message: "ID utilisateur requis." });
@@ -85,7 +87,7 @@ export const showProfile = async (req: Request, res: Response): Promise<void> =>
   }
   
   try {
-    const user = await User.findOne({ user_id: parseInt(userId as string) });
+    const user = await User.findOne({ user_id: userId });
     if (!user) {
       res.status(404).render("error", { message: "Utilisateur non trouvé." });
       return;
