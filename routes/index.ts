@@ -6,9 +6,33 @@ import {
   createReply,
   listMessages,
 } from "../controllers/postController.js";
-import { showLogin, login, showSignup, signup, showProfile, updateProfile } from "../controllers/authController.js";
+import { showLogin, login, showSignup, signup, showProfile, updateProfile, logout } from "../controllers/authController.js";
 
 const router: Router = Router();
+
+// Middleware de protection de routes
+router.use((req, res, next) => {
+  const PUBLIC_ROUTES = [
+    "/signin",
+    "/signup",
+    "/", // Affichage login (GET)
+    "/logout",
+  ];
+
+  // Whitelist : Autorise toujours les routes publiques
+  if (
+    PUBLIC_ROUTES.includes(req.path) ||
+    (req.method === "GET" && req.path === "/signup")
+  ) {
+    return next();
+  }
+
+  // Si pas connecté ==> redirection vers login
+  if (!req.session || !req.session.userId) {
+    return res.redirect("/");
+  }
+  next();
+});
 
 router.get("/index", getAllPosts);
 router.post("/createMessage", createPost);
@@ -21,5 +45,6 @@ router.get("/signup", showSignup);
 router.post("/signup", signup);
 router.get("/profile", showProfile);
 router.put("/profile", updateProfile);
+router.get("/logout", logout);
 
 export default router;
