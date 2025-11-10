@@ -112,7 +112,8 @@ export const listMessages = async (
 ): Promise<void> => {
   try {
     const posts = await Post.find().sort({ post_id: -1 });
-    res.render("listMessage", { posts, userId: req.query.userId || "" });
+    const userId = req.session?.userId || req.query.userId || "";
+    res.render("listMessage", { posts, userId });
   } catch (error) {
     res.status(500).render("error", { message: "Erreur serveur" });
   }

@@ -59,6 +59,16 @@ export interface CreateReplyRequest {
     answerIndex: number;
     reply: string;
 }
+export interface IGroup extends Document {
+    name: string;
+    users: number[];
+    createdBy: number;
+    createdAt: Date;
+}
+export interface CreateGroupRequest {
+    name: string;
+    userIds: number[];
+}
 declare module "express-session" {
     interface SessionData {
         userId?: number;

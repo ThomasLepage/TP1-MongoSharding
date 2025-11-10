@@ -70,6 +70,18 @@ export interface CreateReplyRequest {
   reply: string;
 }
 
+export interface IGroup extends Document {
+  name: string;
+  users: number[]; // Array of user_id
+  createdBy: number; // user_id of the creator
+  createdAt: Date;
+}
+
+export interface CreateGroupRequest {
+  name: string;
+  userIds: number[]; // Array of user_id to include in the group
+}
+
 declare module "express-session" {
   interface SessionData {
     userId?: number;

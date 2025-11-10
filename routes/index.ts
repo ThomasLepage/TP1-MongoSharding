@@ -7,6 +7,7 @@ import {
   listMessages,
 } from "../controllers/postController.js";
 import { showLogin, login, showSignup, signup, showProfile, updateProfile, logout } from "../controllers/authController.js";
+import { createGroup, getAllUsers } from "../controllers/groupController.js";
 
 const router: Router = Router();
 
@@ -46,5 +47,7 @@ router.post("/signup", signup);
 router.get("/profile", showProfile);
 router.put("/profile", updateProfile);
 router.get("/logout", logout);
+router.post("/createGroup", createGroup);
+router.get("/api/users", getAllUsers);
 
 export default router;

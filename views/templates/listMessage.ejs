@@ -8,6 +8,7 @@
       <div class="header">
         <h1>Liste des messages</h1>
         <div class="header-actions">
+          <button id="createGroupBtn" class="create-group-button">Créer un groupe</button>
           <a href="/profile?userId=<%= userId %>" class="profile-button">Mon profil</a>
           <a href="/logout" class="logout-button">Se déconnecter</a>
         </div>
@@ -68,6 +69,51 @@
         </div>
       <% }) %>
     </div>
+
+    <!-- Modal pour créer un groupe -->
+    <div id="groupModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Créer un nouveau groupe</h2>
+          <span class="modal-close">&times;</span>
+        </div>
+        <form id="createGroupForm" class="modal-form">
+          <div class="form-group">
+            <label for="groupName">Nom du groupe</label>
+            <input 
+              type="text" 
+              id="groupName" 
+              name="name" 
+              placeholder="Entrez le nom du groupe" 
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Sélectionner les membres du groupe</label>
+            <div id="usersLoading" class="users-loading">Chargement des utilisateurs...</div>
+            <div id="usersList" class="users-list" style="display: none;">
+              <div class="users-search-container">
+                <input 
+                  type="text" 
+                  id="userSearch" 
+                  class="user-search-input"
+                  placeholder="Rechercher un utilisateur..."
+                />
+              </div>
+              <div class="users-checkboxes" id="usersCheckboxes">
+                <!-- Les checkboxes seront générées dynamiquement -->
+              </div>
+            </div>
+            <small class="form-hint">Vous serez automatiquement ajouté au groupe en tant que créateur.</small>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="modal-cancel-btn">Annuler</button>
+            <button type="submit" class="modal-submit-btn">Créer le groupe</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <script>
       document.getElementById("newPostForm").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -141,6 +187,166 @@
             alert("Une erreur est survenue");
           }
         });
+      });
+
+      // Gestion de la modal de création de groupe
+      const modal = document.getElementById("groupModal");
+      const createGroupBtn = document.getElementById("createGroupBtn");
+      const closeModal = document.querySelector(".modal-close");
+      const cancelBtn = document.querySelector(".modal-cancel-btn");
+      const createGroupForm = document.getElementById("createGroupForm");
+      const usersLoading = document.getElementById("usersLoading");
+      const usersList = document.getElementById("usersList");
+      const usersCheckboxes = document.getElementById("usersCheckboxes");
+      const userSearch = document.getElementById("userSearch");
+      // Récupérer le userId depuis le template ou depuis un champ caché
+      let currentUserId = 0;
+      try {
+        const userIdStr = "<%= userId %>";
+        if (userIdStr && userIdStr !== "") {
+          currentUserId = parseInt(userIdStr);
+          if (isNaN(currentUserId)) {
+            currentUserId = 0;
+          }
+        }
+      } catch (e) {
+        currentUserId = 0;
+      }
+      let allUsers = [];
+      let filteredUsers = [];
+
+      // Charger la liste des utilisateurs
+      async function loadUsers() {
+        try {
+          usersLoading.style.display = "block";
+          usersList.style.display = "none";
+          
+          const response = await fetch("/api/users");
+          if (response.ok) {
+            allUsers = await response.json();
+            // Exclure l'utilisateur actuel de la liste
+            filteredUsers = allUsers.filter(user => user.user_id !== currentUserId);
+            renderUsers(filteredUsers);
+            usersLoading.style.display = "none";
+            usersList.style.display = "block";
+          } else {
+            usersLoading.textContent = "Erreur lors du chargement des utilisateurs";
+          }
+        } catch (error) {
+          console.error("Erreur:", error);
+          usersLoading.textContent = "Erreur lors du chargement des utilisateurs";
+        }
+      }
+
+      // Afficher les utilisateurs avec des checkboxes
+      function renderUsers(users) {
+        usersCheckboxes.innerHTML = "";
+        
+        if (users.length === 0) {
+          usersCheckboxes.innerHTML = '<div class="no-users">Aucun utilisateur trouvé</div>';
+          return;
+        }
+
+        users.forEach(user => {
+          const label = document.createElement("label");
+          label.className = "user-checkbox-label";
+          
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.name = "userIds";
+          checkbox.value = user.user_id;
+          checkbox.className = "user-checkbox";
+          
+          const userName = document.createElement("span");
+          userName.textContent = `${user.firstname} ${user.lastname}`;
+          userName.className = "user-name";
+          
+          label.appendChild(checkbox);
+          label.appendChild(userName);
+          usersCheckboxes.appendChild(label);
+        });
+      }
+
+      // Filtrer les utilisateurs lors de la recherche
+      userSearch.addEventListener("input", (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        if (searchTerm === "") {
+          filteredUsers = allUsers.filter(user => user.user_id !== currentUserId);
+        } else {
+          filteredUsers = allUsers.filter(user => 
+            user.user_id !== currentUserId &&
+            (user.firstname.toLowerCase().includes(searchTerm) ||
+             user.lastname.toLowerCase().includes(searchTerm) ||
+             user.email.toLowerCase().includes(searchTerm))
+          );
+        }
+        renderUsers(filteredUsers);
+      });
+
+      // Ouvrir la modal et charger les utilisateurs
+      createGroupBtn.addEventListener("click", () => {
+        modal.style.display = "block";
+        loadUsers();
+      });
+
+      // Fermer la modal
+      function closeModalFunc() {
+        modal.style.display = "none";
+        createGroupForm.reset();
+        userSearch.value = "";
+        // Réinitialiser les checkboxes
+        const checkboxes = usersCheckboxes.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = false);
+      }
+
+      closeModal.addEventListener("click", closeModalFunc);
+      cancelBtn.addEventListener("click", closeModalFunc);
+
+      // Fermer la modal en cliquant en dehors
+      window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          closeModalFunc();
+        }
+      });
+
+      // Soumettre le formulaire de création de groupe
+      createGroupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        
+        const submitButton = createGroupForm.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = "Création...";
+
+        const formData = new FormData(createGroupForm);
+        const name = formData.get("name");
+        
+        // Récupérer les IDs des utilisateurs sélectionnés
+        const selectedCheckboxes = usersCheckboxes.querySelectorAll('input[type="checkbox"]:checked');
+        const userIds = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
+
+        try {
+          const response = await fetch("/createGroup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, userIds }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            alert(`Groupe "${name}" créé avec succès !`);
+            closeModalFunc();
+          } else {
+            alert(data.error || "Erreur lors de la création du groupe");
+          }
+        } catch (error) {
+          console.error("Erreur:", error);
+          alert("Une erreur est survenue lors de la création du groupe");
+        } finally {
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
+        }
       });
     </script>
   </body>
