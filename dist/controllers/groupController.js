@@ -53,4 +53,31 @@ export const getAllUsers = async (req, res) => {
         res.status(500).json({ error: "Erreur serveur" });
     }
 };
+export const showGroups = async (req, res) => {
+    try {
+        const userId = req.session?.userId;
+        if (!userId) {
+            res.redirect("/");
+            return;
+        }
+        // Récupérer tous les groupes de l'utilisateur
+        const groups = await Group.find({ users: userId })
+            .select("_id name users createdBy createdAt")
+            .sort({ name: 1 });
+        // Pour chaque groupe, récupérer les détails des utilisateurs
+        const enrichedGroups = await Promise.all(groups.map(async (group) => {
+            const users = await User.find({ user_id: { $in: group.users } })
+                .select("user_id firstname lastname");
+            return {
+                ...group.toObject(),
+                userDetails: users,
+            };
+        }));
+        res.render("groups", { groups: enrichedGroups, userId });
+    }
+    catch (error) {
+        console.error("Erreur lors de la récupération des groupes:", error);
+        res.status(500).render("error", { error: "Erreur serveur" });
+    }
+};
 //# sourceMappingURL=groupController.js.map

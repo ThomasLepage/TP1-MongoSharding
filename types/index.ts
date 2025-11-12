@@ -82,6 +82,11 @@ export interface CreateGroupRequest {
   userIds: number[]; // Array of user_id to include in the group
 }
 
+export interface ShowGroups {
+  name: string;
+  createdAt: Date;
+}
+
 declare module "express-session" {
   interface SessionData {
     userId?: number;

@@ -1,74 +1,50 @@
 <html>
   <head>
-    <title>Liste des messages</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Mes groupes</title>
+    <link rel="stylesheet" href="/css/styles.css"> 
   </head>
   <body>
     <div class="container">
       <div class="header">
-        <h1>Liste des messages</h1>
+        <h1>Mes groupes</h1>
         <div class="header-actions">
           <button id="createGroupBtn" class="create-group-button">Créer un groupe</button>
-          <a href="/groups" class="show-group-button">Mes groupes</a>
+          <a href="/listMessage" class="show-group-button">← Retour aux messages</a>
           <a href="/profile?userId=<%= userId %>" class="profile-button">Mon profil</a>
           <a href="/logout" class="logout-button">Se déconnecter</a>
         </div>
       </div>
-      <div class="new-post-form">
-        <h2>Nouveau message</h2>
-        <form id="newPostForm" class="form-flex">
-          <input type="hidden" name="authorId" value="<%= userId %>">
-          <div class="input-group">
-            <textarea name="message" placeholder="Écrivez votre message..." required></textarea>
-            <button type="submit">Publier</button>
-          </div>
-        </form>
-      </div>
-      <% posts.forEach(p => { %>
-        <div class="post">
-          <div class="post-author"><%= p.author %></div>
-          <div class="post-message"><%= p.message %></div>
-          <div class="post-answers">
-            <em>Réponses:</em>
-            <ul>
-              <% p.answers.forEach((a, answerIndex) => { %>
-                <li class="answer">
-                  <div class="answer-content">
-                    <span class="answer-author"><%= a.author %></span>: <%= a.message %>
-                  </div>
-                  <% if (a.replies && a.replies.length > 0) { %>
-                    <div class="replies">
-                      <em>Réponses à cette réponse:</em>
-                      <ul>
-                        <% a.replies.forEach(r => { %>
-                          <li class="reply"><span class="reply-author"><%= r.author %></span>: <%= r.message %></li>
-                        <% }) %>
-                      </ul>
-                    </div>
-                  <% } %>
-                  <form class="reply-form form-flex" data-post-id="<%= p.post_id %>" data-answer-index="<%= answerIndex %>">
-                    <input type="hidden" name="authorId" value="<%= userId %>">
-                    <input type="hidden" name="messageId" value="<%= p.post_id %>">
-                    <input type="hidden" name="answerIndex" value="<%= answerIndex %>">
-                    <div class="input-group">
-                      <textarea name="reply" placeholder="Répondre à cette réponse..." required></textarea>
-                      <button type="submit">Répondre</button>
-                    </div>
-                  </form>
-                </li>
-              <% }) %>
-            </ul>
-            <form class="answer-form form-flex" data-post-id="<%= p.post_id %>">
-              <input type="hidden" name="authorId" value="<%= userId %>">
-              <input type="hidden" name="messageId" value="<%= p.post_id %>">
-              <div class="input-group">
-                <textarea name="answer" placeholder="Votre réponse..." required></textarea>
-                <button type="submit">Répondre</button>
+
+      <% if (groups && groups.length > 0) { %>
+        <div class="groups-list">
+          <% groups.forEach(group => { %>
+            <div class="group-card">
+              <div class="group-header">
+                <h2><%= group.name %></h2>
+                <span class="group-date"><%= new Date(group.createdAt).toLocaleDateString('fr-FR') %></span>
               </div>
-            </form>
-          </div>
+              <div class="group-members">
+                <p><strong>Membres (<%= group.userDetails.length %>):</strong></p>
+                <ul>
+                  <% group.userDetails.forEach(user => { %>
+                    <li>
+                      <%= user.firstname %> <%= user.lastname %>
+                      <% if (user.user_id === group.createdBy) { %>
+                        <span class="creator-badge">(Créateur)</span>
+                      <% } %>
+                    </li>
+                  <% }) %>
+                </ul>
+              </div>
+            </div>
+          <% }) %>
         </div>
-      <% }) %>
+      <% } else { %>
+        <div class="no-groups">
+          <p>Vous n'êtes membre d'aucun groupe.</p>
+          <button id="createGroupBtn" class="create-group-button">Créer votre premier groupe</button>
+        </div>
+      <% } %>
     </div>
 
     <!-- Modal pour créer un groupe -->
@@ -116,80 +92,6 @@
     </div>
 
     <script>
-      document.getElementById("newPostForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const form = e.target;
-        const authorId = form.querySelector('input[name="authorId"]').value;
-        const message = form.querySelector('textarea[name="message"]').value;
-        try {
-          const response = await fetch("/createMessage", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ authorId, message }),
-          });
-          if (response.ok) {
-            form.reset();
-            window.location.reload();
-          } else {
-            alert("Erreur lors de la création du message");
-          }
-        } catch (error) {
-          console.error("Erreur:", error);
-          alert("Une erreur est survenue");
-        }
-      });
-
-      document.querySelectorAll(".answer-form").forEach(form => {
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const authorId = form.querySelector('input[name="authorId"]').value;
-          const messageId = form.querySelector('input[name="messageId"]').value;
-          const answer = form.querySelector('textarea[name="answer"]').value;
-          try {
-            const response = await fetch("/createAnswer", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ authorId, messageId, answer }),
-            });
-            if (response.ok) {
-              form.reset();
-              window.location.reload();
-            } else {
-              alert("Erreur lors de l'ajout de la réponse");
-            }
-          } catch (error) {
-            console.error("Erreur:", error);
-            alert("Une erreur est survenue");
-          }
-        });
-      });
-
-      document.querySelectorAll(".reply-form").forEach(form => {
-        form.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const authorId = form.querySelector('input[name="authorId"]').value;
-          const messageId = form.querySelector('input[name="messageId"]').value;
-          const answerIndex = parseInt(form.querySelector('input[name="answerIndex"]').value);
-          const reply = form.querySelector('textarea[name="reply"]').value;
-          try {
-            const response = await fetch("/createReply", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ authorId, messageId, answerIndex, reply }),
-            });
-            if (response.ok) {
-              form.reset();
-              window.location.reload();
-            } else {
-              alert("Erreur lors de l'ajout de la réponse");
-            }
-          } catch (error) {
-            console.error("Erreur:", error);
-            alert("Une erreur est survenue");
-          }
-        });
-      });
-
       // Gestion de la modal de création de groupe
       const modal = document.getElementById("groupModal");
       const createGroupBtn = document.getElementById("createGroupBtn");
@@ -200,7 +102,8 @@
       const usersList = document.getElementById("usersList");
       const usersCheckboxes = document.getElementById("usersCheckboxes");
       const userSearch = document.getElementById("userSearch");
-      // Récupérer le userId depuis le template ou depuis un champ caché
+      
+      // Récupérer le userId depuis le template
       let currentUserId = 0;
       try {
         const userIdStr = "<%= userId %>";
@@ -213,6 +116,7 @@
       } catch (e) {
         currentUserId = 0;
       }
+      
       let allUsers = [];
       let filteredUsers = [];
 
@@ -338,6 +242,7 @@
           if (response.ok && data.success) {
             alert(`Groupe "${name}" créé avec succès !`);
             closeModalFunc();
+            location.reload();
           } else {
             alert(data.error || "Erreur lors de la création du groupe");
           }

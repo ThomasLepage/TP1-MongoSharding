@@ -557,6 +557,27 @@ button:active {
   background-color: #4457c2;
 }
 
+.show-group-button {
+  background-color: #BF40BF;
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-right: 10px;
+}
+
+.show-group-button:hover {
+  background-color: #9D349D;
+}
+
+.show-group-button:active {
+  background-color: #7A297A;
+}
+
 /* Modal */
 .modal {
   display: none;

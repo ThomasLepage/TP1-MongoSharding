@@ -69,6 +69,10 @@ export interface CreateGroupRequest {
     name: string;
     userIds: number[];
 }
+export interface ShowGroups {
+    name: string;
+    createdAt: Date;
+}
 declare module "express-session" {
     interface SessionData {
         userId?: number;

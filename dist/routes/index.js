@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getAllPosts, createPost, createAnswer, createReply, listMessages, } from "../controllers/postController.js";
 import { showLogin, login, showSignup, signup, showProfile, updateProfile, logout } from "../controllers/authController.js";
-import { createGroup, getAllUsers } from "../controllers/groupController.js";
+import { createGroup, getAllUsers, showGroups } from "../controllers/groupController.js";
 const router = Router();
 // Middleware de protection de routes
 router.use((req, res, next) => {
@@ -36,5 +36,6 @@ router.put("/profile", updateProfile);
 router.get("/logout", logout);
 router.post("/createGroup", createGroup);
 router.get("/api/users", getAllUsers);
+router.get("/groups", showGroups);
 export default router;
 //# sourceMappingURL=index.js.map
