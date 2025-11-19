@@ -73,6 +73,34 @@ export interface ShowGroups {
     name: string;
     createdAt: Date;
 }
+export interface IGroupReply extends Document {
+    message: string;
+    author: string;
+    userId: number;
+    createdAt: Date;
+    image?: string;
+}
+export interface IGroupAnswer extends Document {
+    message: string;
+    author: string;
+    userId: number;
+    createdAt: Date;
+    image?: string;
+    replies: IGroupReply[];
+}
+export interface IGroupMessage extends Document {
+    message: string;
+    author: string;
+    userId: number;
+    createdAt: Date;
+    image?: string;
+    answers: IGroupAnswer[];
+}
+export interface IGroupPost extends Document {
+    group: any;
+    messages: IGroupMessage[];
+    createdAt: Date;
+}
 declare module "express-session" {
     interface SessionData {
         userId?: number;

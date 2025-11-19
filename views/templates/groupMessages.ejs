@@ -1,0 +1,342 @@
+<html>
+  <head>
+    <title><%= groupName %> - Messages</title>
+    <link rel="stylesheet" href="/css/styles.css"> 
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><%= groupName %></h1>
+        <div class="header-actions">
+          <a href="/groups" class="back-button">← Retour aux groupes</a>
+          <a href="/profile?userId=<%= userId %>" class="profile-button">Mon profil</a>
+          <a href="/logout" class="logout-button">Se déconnecter</a>
+        </div>
+      </div>
+
+      <!-- Formulaire pour créer un nouveau message -->
+      <div class="new-post-form">
+        <h2>Nouveau message</h2>
+        <form id="newGroupMessageForm" class="form-flex">
+          <input type="hidden" name="groupId" value="<%= groupId %>">
+          <input type="hidden" name="authorId" value="<%= userId %>">
+          <input type="hidden" id="messageImage" name="image" value="">
+          <div class="input-group">
+            <textarea name="message" placeholder="Écrivez votre message..." required></textarea>
+            <div class="form-actions">
+              <label for="messageImageInput" class="image-upload-btn">📷 Ajouter une image</label>
+              <input type="file" id="messageImageInput" accept="image/*" style="display: none;">
+              <div id="messageImagePreview" class="image-preview" style="display: none;">
+                <img id="messageImagePreviewImg" src="" alt="Aperçu">
+                <button type="button" class="remove-image-btn" onclick="removeImage('message')">✕</button>
+              </div>
+              <button type="submit">Publier</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Liste des messages -->
+      <div id="messagesList" class="messages-list">
+        <% messages.forEach((msg, messageIndex) => { %>
+          <div class="post">
+            <div class="post-author"><%= msg.author %></div>
+            <div class="post-date"><%= new Date(msg.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></div>
+            <div class="post-message"><%= msg.message %></div>
+            <% if (msg.image) { %>
+              <div class="post-image">
+                <img src="<%= msg.image %>" alt="Image du message">
+              </div>
+            <% } %>
+            
+            <div class="post-answers">
+              <em>Réponses:</em>
+              <ul>
+                <% msg.answers.forEach((answer, answerIndex) => { %>
+                  <li class="answer">
+                    <div class="answer-content">
+                      <span class="answer-author"><%= answer.author %></span>: <%= answer.message %>
+                      <div class="answer-date"><%= new Date(answer.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></div>
+                    </div>
+                    <% if (answer.image) { %>
+                      <div class="answer-image">
+                        <img src="<%= answer.image %>" alt="Image de la réponse">
+                      </div>
+                    <% } %>
+                    
+                    <% if (answer.replies && answer.replies.length > 0) { %>
+                      <div class="replies">
+                        <em>Réponses à cette réponse:</em>
+                        <ul>
+                          <% answer.replies.forEach(reply => { %>
+                            <li class="reply">
+                              <span class="reply-author"><%= reply.author %></span>: <%= reply.message %>
+                              <div class="reply-date"><%= new Date(reply.createdAt).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></div>
+                              <% if (reply.image) { %>
+                                <div class="reply-image">
+                                  <img src="<%= reply.image %>" alt="Image de la réponse">
+                                </div>
+                              <% } %>
+                            </li>
+                          <% }) %>
+                        </ul>
+                      </div>
+                    <% } %>
+
+                    <!-- Formulaire pour répondre à une réponse -->
+                    <form class="reply-form form-flex" data-group-id="<%= groupId %>" data-message-index="<%= messageIndex %>" data-answer-index="<%= answerIndex %>">
+                      <input type="hidden" name="groupId" value="<%= groupId %>">
+                      <input type="hidden" name="authorId" value="<%= userId %>">
+                      <input type="hidden" name="messageIndex" value="<%= messageIndex %>">
+                      <input type="hidden" name="answerIndex" value="<%= answerIndex %>">
+                      <input type="hidden" class="replyImage" name="image" value="">
+                      <div class="input-group">
+                        <textarea name="reply" placeholder="Répondre à cette réponse..." required></textarea>
+                        <div class="form-actions">
+                          <label class="image-upload-btn image-upload-reply">📷 Ajouter une image</label>
+                          <input type="file" class="replyImageInput" accept="image/*" style="display: none;">
+                          <div class="replyImagePreview image-preview" style="display: none;">
+                            <img class="replyImagePreviewImg" src="" alt="Aperçu">
+                            <button type="button" class="remove-image-btn" onclick="removeImage('reply', this)">✕</button>
+                          </div>
+                          <button type="submit">Répondre</button>
+                        </div>
+                      </div>
+                    </form>
+                  </li>
+                <% }) %>
+              </ul>
+              
+              <!-- Formulaire pour ajouter une réponse au message -->
+              <form class="answer-form form-flex" data-group-id="<%= groupId %>" data-message-index="<%= messageIndex %>">
+                <input type="hidden" name="groupId" value="<%= groupId %>">
+                <input type="hidden" name="authorId" value="<%= userId %>">
+                <input type="hidden" name="messageIndex" value="<%= messageIndex %>">
+                <input type="hidden" class="answerImage" name="image" value="">
+                <div class="input-group">
+                  <textarea name="answer" placeholder="Votre réponse..." required></textarea>
+                  <div class="form-actions">
+                    <label class="image-upload-btn image-upload-answer">📷 Ajouter une image</label>
+                    <input type="file" class="answerImageInput" accept="image/*" style="display: none;">
+                    <div class="answerImagePreview image-preview" style="display: none;">
+                      <img class="answerImagePreviewImg" src="" alt="Aperçu">
+                      <button type="button" class="remove-image-btn" onclick="removeImage('answer', this)">✕</button>
+                    </div>
+                    <button type="submit">Répondre</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <% if (messages.length === 0) { %>
+        <div class="no-messages">
+          <p>Aucun message pour l'instant. Soyez le premier à poster!</p>
+        </div>
+      <% } %>
+    </div>
+
+    <script>
+      const groupId = "<%= groupId %>";
+
+      // Fonction pour convertir une image en base64
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        });
+      }
+
+      // Gérer l'upload d'image pour les nouveaux messages
+      document.getElementById("messageImageInput").addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const base64 = await fileToBase64(file);
+          document.getElementById("messageImage").value = base64;
+          const preview = document.getElementById("messageImagePreview");
+          const img = document.getElementById("messageImagePreviewImg");
+          img.src = base64;
+          preview.style.display = "block";
+        }
+      });
+
+      // Gérer l'upload d'image pour les réponses
+      document.querySelectorAll(".answerImageInput").forEach(input => {
+        input.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const base64 = await fileToBase64(file);
+            const form = input.closest(".answer-form");
+            form.querySelector(".answerImage").value = base64;
+            const preview = form.querySelector(".answerImagePreview");
+            const img = form.querySelector(".answerImagePreviewImg");
+            img.src = base64;
+            preview.style.display = "block";
+          }
+        });
+      });
+
+      // Gérer l'upload d'image pour les replies
+      document.querySelectorAll(".replyImageInput").forEach(input => {
+        input.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const base64 = await fileToBase64(file);
+            const form = input.closest(".reply-form");
+            form.querySelector(".replyImage").value = base64;
+            const preview = form.querySelector(".replyImagePreview");
+            const img = form.querySelector(".replyImagePreviewImg");
+            img.src = base64;
+            preview.style.display = "block";
+          }
+        });
+      });
+
+      // Fonction pour supprimer une image
+      function removeImage(type, btn = null) {
+        if (type === "message") {
+          document.getElementById("messageImage").value = "";
+          document.getElementById("messageImagePreview").style.display = "none";
+          document.getElementById("messageImageInput").value = "";
+        } else if (type === "answer" && btn) {
+          const form = btn.closest(".answer-form");
+          form.querySelector(".answerImage").value = "";
+          form.querySelector(".answerImagePreview").style.display = "none";
+          form.querySelector(".answerImageInput").value = "";
+        } else if (type === "reply" && btn) {
+          const form = btn.closest(".reply-form");
+          form.querySelector(".replyImage").value = "";
+          form.querySelector(".replyImagePreview").style.display = "none";
+          form.querySelector(".replyImageInput").value = "";
+        }
+      }
+
+      // Connecter les labels aux inputs
+      document.querySelectorAll(".image-upload-answer").forEach(label => {
+        label.addEventListener("click", (e) => {
+          const form = label.closest(".answer-form");
+          form.querySelector(".answerImageInput").click();
+        });
+      });
+
+      document.querySelectorAll(".image-upload-reply").forEach(label => {
+        label.addEventListener("click", (e) => {
+          const form = label.closest(".reply-form");
+          form.querySelector(".replyImageInput").click();
+        });
+      });
+
+      document.querySelector(".image-upload-btn").addEventListener("click", () => {
+        document.getElementById("messageImageInput").click();
+      });
+
+      // Créer un nouveau message
+      document.getElementById("newGroupMessageForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const groupId = form.querySelector('input[name="groupId"]').value;
+        const authorId = form.querySelector('input[name="authorId"]').value;
+        const message = form.querySelector('textarea[name="message"]').value;
+        const image = form.querySelector('input[name="image"]').value;
+
+        try {
+          const payload = { groupId, authorId, message };
+          if (image && image.trim()) {
+            payload.image = image;
+          }
+
+          const response = await fetch(`/group/${groupId}/message`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (response.ok) {
+            form.reset();
+            window.location.reload();
+          } else {
+            alert("Erreur lors de la création du message");
+          }
+        } catch (error) {
+          console.error("Erreur:", error);
+          alert("Une erreur est survenue");
+        }
+      });
+
+      // Ajouter une réponse à un message
+      document.querySelectorAll(".answer-form").forEach(form => {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const groupId = form.querySelector('input[name="groupId"]').value;
+          const authorId = form.querySelector('input[name="authorId"]').value;
+          const messageIndex = parseInt(form.querySelector('input[name="messageIndex"]').value);
+          const answer = form.querySelector('textarea[name="answer"]').value;
+          const image = form.querySelector('input[name="image"]').value;
+
+          try {
+            const payload = { groupId, authorId, messageIndex, answer };
+            if (image && image.trim()) {
+              payload.image = image;
+            }
+
+            const response = await fetch(`/group/${groupId}/answer`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+              form.reset();
+              window.location.reload();
+            } else {
+              alert("Erreur lors de l'ajout de la réponse");
+            }
+          } catch (error) {
+            console.error("Erreur:", error);
+            alert("Une erreur est survenue");
+          }
+        });
+      });
+
+      // Ajouter une réponse à une réponse
+      document.querySelectorAll(".reply-form").forEach(form => {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const groupId = form.querySelector('input[name="groupId"]').value;
+          const authorId = form.querySelector('input[name="authorId"]').value;
+          const messageIndex = parseInt(form.querySelector('input[name="messageIndex"]').value);
+          const answerIndex = parseInt(form.querySelector('input[name="answerIndex"]').value);
+          const reply = form.querySelector('textarea[name="reply"]').value;
+          const image = form.querySelector('input[name="image"]').value;
+
+          try {
+            const payload = { groupId, authorId, messageIndex, answerIndex, reply };
+            if (image && image.trim()) {
+              payload.image = image;
+            }
+
+            const response = await fetch(`/group/${groupId}/reply`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+              form.reset();
+              window.location.reload();
+            } else {
+              alert("Erreur lors de l'ajout de la réponse");
+            }
+          } catch (error) {
+            console.error("Erreur:", error);
+            alert("Une erreur est survenue");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
