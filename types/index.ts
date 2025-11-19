@@ -5,12 +5,21 @@ export interface IUser extends Document {
   firstname: string;
   lastname: string;
   email: string;
+  password: string;
+  avatar: string;
+}
+
+export interface IReply {
+  message: string;
+  author: string;
+  creationDate: Date;
 }
 
 export interface IAnswer {
   message: string;
   author: string;
   creationDate: Date;
+  replies: IReply[];
 }
 
 export interface IPost extends Document {
@@ -23,6 +32,24 @@ export interface IPost extends Document {
 
 export interface LoginRequest {
   email: string;
+  password: string;
+}
+
+export interface SignupRequest {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
+  avatar: string;
+}
+
+export interface UpdateProfileRequest {
+  userId: number;
+  firstname: string;
+  lastname: string;
+  email: string;
+  password?: string;
+  avatar: string;
 }
 
 export interface CreatePostRequest {
@@ -34,4 +61,66 @@ export interface CreateAnswerRequest {
   authorId: number;
   messageId: number;
   answer: string;
+}
+
+export interface CreateReplyRequest {
+  authorId: number;
+  messageId: number;
+  answerIndex: number;
+  reply: string;
+}
+
+export interface IGroup extends Document {
+  name: string;
+  users: number[]; // Array of user_id
+  createdBy: number; // user_id of the creator
+  createdAt: Date;
+}
+
+export interface CreateGroupRequest {
+  name: string;
+  userIds: number[]; // Array of user_id to include in the group
+}
+
+export interface ShowGroups {
+  name: string;
+  createdAt: Date;
+}
+
+export interface IGroupReply extends Document {
+  message: string;
+  author: string;
+  userId: number;
+  createdAt: Date;
+  image?: string; // Base64 encoded image
+}
+
+export interface IGroupAnswer extends Document {
+  message: string;
+  author: string;
+  userId: number;
+  createdAt: Date;
+  image?: string; // Base64 encoded image
+  replies: IGroupReply[];
+}
+
+export interface IGroupMessage extends Document {
+  message: string;
+  author: string;
+  userId: number;
+  createdAt: Date;
+  image?: string; // Base64 encoded image
+  answers: IGroupAnswer[];
+}
+
+export interface IGroupPost extends Document {
+  group: any; // ObjectId reference to Group
+  messages: IGroupMessage[];
+  createdAt: Date;
+}
+
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+  }
 }
